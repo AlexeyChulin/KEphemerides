@@ -17,6 +17,10 @@ fun testEphemeris01NewYear2024() {
     val referenceStateSun = arrayOf(24810993.259654, -133033452.131155, -57668106.240179, 29.841464, 4.703725, 2.038024)
     val referenceStateMoon = arrayOf(-367952.531142, 142774.973143, 89342.281181, -0.409768, -0.779798, -0.402679)
     testEphemeris(datetime, referenceStateSun, referenceStateMoon)
+    val referenceStateMars = arrayOf(-19074781.314242, -330823495.157156, -147205952.773975, 54.503378, 2.469513, 0.347854)
+    testEphemerisMars(datetime, referenceStateMars)
+    val referenceStateVenus = arrayOf(	-82187748.980149, -145937135.858503, -56704820.144932, 33.354924, -27.115838, -12.501973)
+    testEphemerisVenus(datetime, referenceStateVenus)
 }
 
 fun testEphemeris02StartBlock() {
@@ -104,6 +108,58 @@ fun testEphemeris(datetime: DateTime, referenceStateSun: Array<Double>, referenc
     }
     for (i in 3..5) {
         assertDoubleEqual(resultStateMoon[i], referenceStateMoon[i], 1e-6)
+    }
+}
+
+fun testEphemerisMars(datetime: DateTime, referenceStateMars: Array<Double>) {
+    val julianDate = datetime.dateTimeToJED()
+    val ephemeris = EphemerisRelease(julianDate)
+    println("datetime = $ (julian date $julianDate)")
+    println("block start date = ${jedToDateTime(ephemeris.coefficients.blockStartDate)} (julian date ${ephemeris.coefficients.blockStartDate})")
+    println("block end date =  ${jedToDateTime(ephemeris.coefficients.blockEndDate)} (julian date ${ephemeris.coefficients.blockEndDate})")
+    if (ephemeris.coefficients.values == null) {
+        println("ephemeris.coefficients.values == null")
+    }
+    val resultArrayMars = ephemeris.calculateBody(CalculationKind.POSITION, CelestialBody.MARS, CelestialBody.EARTH)
+    println("Mars position relative to Earth: [${resultArrayMars!![0]}, ${resultArrayMars[1]}, ${resultArrayMars[2]}] km")
+    for (i in resultArrayMars.indices) {
+        assertDoubleEqual(resultArrayMars[i], referenceStateMars[i], 1.0)
+    }
+    val resultStateMars = ephemeris.calculateBody(CalculationKind.STATE, CelestialBody.MARS, CelestialBody.EARTH)
+    //println("resultStateSun.size = ${resultStateSun!!.size}")
+    println("Mars position relative to Earth: [${resultStateMars!![0]}, ${resultStateMars[1]}, ${resultStateMars[2]}] km")
+    println("Mars velocity relative to Earth: [${resultStateMars[3]}, ${resultStateMars[4]}, ${resultStateMars[5]}] km/s")
+    for (i in 0..2) {
+        assertDoubleEqual(resultStateMars[i], referenceStateMars[i], 1e-2)
+    }
+    for (i in 3..5) {
+        assertDoubleEqual(resultStateMars[i], referenceStateMars[i], 1e-6)
+    }
+}
+
+fun testEphemerisVenus(datetime: DateTime, referenceStateVenus: Array<Double>) {
+    val julianDate = datetime.dateTimeToJED()
+    val ephemeris = EphemerisRelease(julianDate)
+    println("datetime = $ (julian date $julianDate)")
+    println("block start date = ${jedToDateTime(ephemeris.coefficients.blockStartDate)} (julian date ${ephemeris.coefficients.blockStartDate})")
+    println("block end date =  ${jedToDateTime(ephemeris.coefficients.blockEndDate)} (julian date ${ephemeris.coefficients.blockEndDate})")
+    if (ephemeris.coefficients.values == null) {
+        println("ephemeris.coefficients.values == null")
+    }
+    val resultArrayVenus = ephemeris.calculateBody(CalculationKind.POSITION, CelestialBody.VENUS, CelestialBody.EARTH)
+    println("Venus position relative to Earth: [${resultArrayVenus!![0]}, ${resultArrayVenus[1]}, ${resultArrayVenus[2]}] km")
+    for (i in resultArrayVenus.indices) {
+        assertDoubleEqual(resultArrayVenus[i], referenceStateVenus[i], 1.0)
+    }
+    val resultStateVenus = ephemeris.calculateBody(CalculationKind.STATE, CelestialBody.VENUS, CelestialBody.EARTH)
+    //println("resultStateSun.size = ${resultStateSun!!.size}")
+    println("Venus position relative to Earth: [${resultStateVenus!![0]}, ${resultStateVenus[1]}, ${resultStateVenus[2]}] km")
+    println("Venus velocity relative to Earth: [${resultStateVenus[3]}, ${resultStateVenus[4]}, ${resultStateVenus[5]}] km/s")
+    for (i in 0..2) {
+        assertDoubleEqual(resultStateVenus[i], referenceStateVenus[i], 1e-2)
+    }
+    for (i in 3..5) {
+        assertDoubleEqual(resultStateVenus[i], referenceStateVenus[i], 1e-6)
     }
 }
 
